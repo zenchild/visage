@@ -85,10 +85,13 @@ module Visage
     # JSON data backend
 
     # /data/:host/:plugin/:optional_plugin_instance
-    get %r{/data/([^/]+)/([^/]+)((/[^/]+)*)} do
-      host = params[:captures][0].gsub("\0", "")
-      plugin = params[:captures][1].gsub("\0", "")
-      plugin_instances = params[:captures][2].gsub("\0", "")
+    get %r{/data/([^/]+)/([^/]+)/([^/]+)((/[^/]+)*)} do
+      backend = params[:captures][0].gsub("\0", "")
+      host = params[:captures][1].gsub("\0", "")
+      plugin = params[:captures][2].gsub("\0", "")
+      plugin_instances = params[:captures][3].gsub("\0", "")
+
+      json_enc = Visage::Backends::BACKENDS[backend.to_sym].json_encoder
 
       collectd = CollectdJSON.new(:rrddir => Visage::Config.collectd_rrddir)
       json = collectd.json(:host => host,

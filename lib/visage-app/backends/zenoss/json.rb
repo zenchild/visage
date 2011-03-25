@@ -1,8 +1,7 @@
-# Exposes RRDs as JSON.
-#
-# A loose shim onto RRDtool, with some extra logic to normalise the data.
-#
 module Visage::Backends
+
+  # This class exposes Zenoss datasources as JSON data that is compatible with
+  # what Visage expects to render graphs with.
   class ZenossJSON
 
     def initialize(opts={})
