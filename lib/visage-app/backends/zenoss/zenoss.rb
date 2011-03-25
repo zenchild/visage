@@ -39,17 +39,30 @@ module Visage
               datapoints |= (host.get_rrd_data_points.map {|dp| dp.name})
             end
           end
-          case
-          when opts[:metrics].blank?
+
+          if opts[:metrics].blank?
             datapoints
-          when opts[:metrics] =~ /,/
-            selection = opts[:metrics].split(/\s*,\s*/)
-            selection & datapoints
-          when opts[:metrics] =~ /\*/
-            re = Regexp.new opts[:metrics]
-            datapoints.select {|dp| re.match(dp)}
           else
-            [opts[:metrics]] & datapoints
+            # This is a bit confusing at first glance, but what it does is lets us pass
+            # a plugin name to the Zenoss backend even though nothing like that really exists
+            # in the Zenoss world. It allows us to group stats based on the arbitrary plugin
+            # name. For instance: myloads/laLoadInt* might group laLoadInt1_laLoadInt1 and
+            # laLoadInt5_laLoadInt5 under myloads.
+            opts[:metrics].split(/\s*,\s*/).inject([]) do |acc,si|
+              plugin, inst = si.split(/\//)
+              if inst.nil?
+                re = Regexp.new plugin
+                datapoints.select {|dp| re.match(dp)}.each do |dp|
+                  acc << dp
+                end
+              else
+                re = Regexp.new inst
+                datapoints.select {|dp| re.match(dp)}.each do |dp|
+                  acc << "#{plugin}/#{dp}"
+                end
+              end
+              acc
+            end
           end
         else
           []

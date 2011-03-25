@@ -15,19 +15,34 @@ module Visage::Backends
     def json(opts={})
       host             = opts[:host]
       plugin           = opts[:plugin]
+      plugin_instances = opts[:plugin_instances][/\w.*/]
 
       zhost = @zenoss.find_devices_by_name(host).first
-      rrd = zhost.fetch_rrd_value(plugin, (Time.now - 3600).to_datetime)
 
       data = []
 
-      data << {
-        :host   => host,
-        :plugin => plugin,
-        :start  => rrd[:start],
-        :finish => rrd[:end],
-        :data   => rrd[:rrdvalues],
-      }
+      if(plugin_instances.blank?)
+        rrd = zhost.fetch_rrd_value(plugin, (Time.now - 3600).to_datetime)
+        data << {
+          :host   => host,
+          :plugin => plugin,
+          :start  => rrd[:start],
+          :finish => rrd[:end],
+          :data   => rrd[:rrdvalues],
+        }
+      else
+        plugin_instances.split(/\s*,\s*/).each do |instance_name|
+          rrd = zhost.fetch_rrd_value(instance_name, (Time.now - 3600).to_datetime)
+          data << {
+            :host   => host,
+            :plugin => plugin,
+            :instance => instance_name,
+            :start  => rrd[:start],
+            :finish => rrd[:end],
+            :data   => rrd[:rrdvalues],
+          }
+        end
+      end
 
       encode(data)
     end
@@ -43,7 +58,7 @@ module Visage::Backends
 
         host     = data[:host]
         plugin   = data[:plugin]
-        instance = data[:plugin]
+        instance = data[:instance]
         start    = data[:start].to_i
         finish   = data[:finish].to_i
         source   = 'ds0'
