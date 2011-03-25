@@ -6,6 +6,7 @@ tmp/*
 pkg/*
 *~
 .#*
+*.swp
 webrat*
 visage-app.gemspec
 lib/visage-app/config/*.yaml
