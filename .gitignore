@@ -1,3 +1,5 @@
+.rvmrc
+Gemfile.lock
 .DS_Store
 log/*
 tmp/*
@@ -6,6 +8,6 @@ pkg/*
 .#*
 webrat*
 visage-app.gemspec
-lib/visage-app/config/profiles.yaml
+lib/visage-app/config/*.yaml
 _site
 features/data/config/*/*.yaml

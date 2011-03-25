@@ -24,8 +24,10 @@ module Visage
 
     configure do
       Visage::Config.use do |c|
-        # FIXME: make this configurable through file
-        c['rrddir'] = ENV["RRDDIR"] ? Pathname.new(ENV["RRDDIR"]).expand_path : Pathname.new("/var/lib/collectd/rrd").expand_path
+        backends = Visage::Config::File.load('backends.yaml')
+        Visage::Backends::BACKENDS.each do |be|
+          be.call(c, backends)
+        end
       end
     end
   end
@@ -89,7 +91,7 @@ module Visage
       plugin = params[:captures][1].gsub("\0", "")
       plugin_instances = params[:captures][2].gsub("\0", "")
 
-      collectd = CollectdJSON.new(:rrddir => Visage::Config.rrddir)
+      collectd = CollectdJSON.new(:rrddir => Visage::Config.collectd_rrddir)
       json = collectd.json(:host => host,
                            :plugin => plugin,
                            :plugin_instances => plugin_instances,

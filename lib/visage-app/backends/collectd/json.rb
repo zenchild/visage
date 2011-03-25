@@ -102,7 +102,7 @@ class CollectdJSON
     attr_writer :rrddir
 
     def rrddir
-      @rrddir ||= Visage::Config.rrddir
+      @rrddir ||= Visage::Config.collectd_rrddir
     end
 
     def hosts
