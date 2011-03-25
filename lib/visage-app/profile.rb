@@ -37,13 +37,11 @@ module Visage
 
       if(@options[:backend])
         @backend = @options[:backend].to_sym
-        puts "=======> FOUND BACKEND '#{@backend}'"
         backend = Visage::Backends::BACKENDS[@backend]
         @hosts = backend.send(:hosts)
         @metrics  = []
 
         unless @options[:hosts].blank?
-          puts "=============> Founds HOSTS #{@options[:hosts]}"
           @selected_hosts = backend.send(:hosts,{:hosts => @options[:hosts]})
           @hosts -= @selected_hosts
 

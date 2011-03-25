@@ -1,4 +1,5 @@
-require 'visage-app/backends/zenoss/rrds'
+require 'zenoss'
+require 'visage-app/backends/zenoss/zenoss'
 require 'visage-app/backends/zenoss/json'
 
 module Visage
@@ -9,6 +10,6 @@ module Visage
       visage_conf['zenoss_pass'] = backend_conf[:zenoss][:pass]
     end
 
-    BACKENDS[:zenoss] = Visage::Zenoss::RRDs
+    BACKENDS[:zenoss] = Visage::Backends::Zenoss
   end
 end
