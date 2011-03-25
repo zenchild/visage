@@ -25,7 +25,7 @@ module Visage
     configure do
       Visage::Config.use do |c|
         backends = Visage::Config::File.load('backends.yaml')
-        Visage::Backends::BACKENDS.each do |be|
+        Visage::Backends::LOADERS.each do |be|
           be.call(c, backends)
         end
       end
@@ -110,7 +110,11 @@ module Visage
     end
 
     get %r{/data(/)*} do
-      hosts = Visage::Collectd::RRDs.hosts
+      hosts = []
+      Visage::Backends::BACKENDS.each_pair do |be_id,be_class|
+        puts "=========> Loading Hosts from #{be_id}"
+        hosts += be_class.send(:hosts)
+      end
       json = { :hosts => hosts }.to_json
       maybe_wrap_with_callback(json)
     end

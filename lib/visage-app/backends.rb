@@ -4,7 +4,8 @@
 # go in 'lib/visage-app/config/backends.yaml'
 module Visage
   module Backends
-    BACKENDS = []
+    LOADERS = []
+    BACKENDS = {}
   end # Backends
 end # Visage
 
