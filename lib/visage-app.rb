@@ -10,8 +10,7 @@ require 'lib/visage-app/profile'
 require 'lib/visage-app/helpers'
 require 'lib/visage-app/config'
 require 'lib/visage-app/config/file'
-require 'lib/visage-app/collectd/rrds'
-require 'lib/visage-app/collectd/json'
+require 'lib/visage-app/backends'
 require 'yajl/json_gem'
 
 module Visage
