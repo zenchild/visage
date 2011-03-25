@@ -3,7 +3,8 @@
 
 %div#profile
   %h2#profile_name= profile_name
-  - @profile.graphs.each do |graph|
+  - graphs = @profile.graphs
+  - graphs.each do |graph|
     - id       = URI.escape(graph.id)
     - host     = URI.escape(graph.host)
     - plugin   = URI.escape(graph.plugin)
@@ -20,7 +21,7 @@
             #{ "baseurl: '" + ENV['BASE_URL'].gsub(/^\//, '') if ENV['BASE_URL'] }
           });
         });
-  - if @profile.graphs.size == 0
+  - if graphs.size == 0
     %div.graph
       %h4.error Oops! Looks like there aren't any graphs matching the specified patterns.
       %p These are the patterns:

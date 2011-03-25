@@ -29,19 +29,25 @@ module Visage
         zenoss = ::Zenoss.connect server, user, pass
 
         if opts[:host] || opts[:hosts]
+          datapoints = []
           if opts[:host]
-            key = :host
+            host = zenoss.find_devices_by_name(opts[:host]).first
+            datapoints += (host.get_rrd_data_points.map {|dp| dp.name})
           else
-            key = :hosts
+            opts[:hosts].strip.split(/\s*,\s*/).each do |host|
+              host = zenoss.find_devices_by_name(host).first
+              datapoints |= (host.get_rrd_data_points.map {|dp| dp.name})
+            end
           end
-          host = zenoss.find_devices_by_name(opts[key]).first
-          datapoints  = host.get_rrd_data_points.map {|dp| dp.name}
           case
           when opts[:metrics].blank?
             datapoints
           when opts[:metrics] =~ /,/
             selection = opts[:metrics].split(/\s*,\s*/)
             selection & datapoints
+          when opts[:metrics] =~ /\*/
+            re = Regexp.new opts[:metrics]
+            datapoints.select {|dp| re.match(dp)}
           else
             [opts[:metrics]] & datapoints
           end

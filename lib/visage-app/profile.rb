@@ -42,7 +42,7 @@ module Visage
         @metrics  = []
 
         unless @options[:hosts].blank?
-          @selected_hosts = backend.send(:hosts,{:hosts => @options[:hosts]})
+          @selected_hosts = backend.send(:hosts, @options)
           @hosts -= @selected_hosts
 
           @metrics = backend.send(:metrics, @options)
@@ -96,7 +96,7 @@ module Visage
       graphs = []
       
       backend = Visage::Backends::BACKENDS[@backend]
-      hosts = backend.send(:hosts,{:hosts => @options[:hosts]})
+      hosts = backend.send(:hosts, @options)
       metrics = @options[:metrics]
       hosts.each do |host|
         attrs = {}
