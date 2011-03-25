@@ -19,6 +19,9 @@
 
     %div#hosts.builder
       %h2 Hosts
+      %select{:name => 'backend'}
+        - @backends.each do |be|
+          %option{:value => be, :selected => (@profile.backend == be)}= be
       %input{:name => "hosts", :type => "text", :class => "text", :value => params[:hosts]}
       %input{:name => "submit", :type => "submit", :class => "submit", :value => "hosts"}
       %img{:src => link_to("/images/hosts.png"), :class => "icon hosts"}

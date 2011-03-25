@@ -55,17 +55,16 @@ module Visage
   class Builder < Application
 
     get "/builder" do
-      if params[:submit] == "create"
-        @profile = Visage::Profile.new(params)
-
+      @profile = Visage::Profile.new(params)
+      @backends = Visage::Backends::BACKENDS.keys
+      case params[:submit]
+      when /create/
         if @profile.save
           redirect "/profiles/#{@profile.url}"
         else
           haml :builder
         end
       else
-        @profile = Visage::Profile.new(params)
-
         haml :builder
       end
     end

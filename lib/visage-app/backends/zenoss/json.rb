@@ -18,7 +18,7 @@ class ZenossJSON
     server = Visage::Config.zenoss_server
     user   = Visage::Config.zenoss_user
     pass   = Visage::Config.zenoss_pass
-    @zenoss = Zenoss.connect server, user, pass
+    @zenoss = ::Zenoss.connect server, user, pass
   end
 
   # Entry point.

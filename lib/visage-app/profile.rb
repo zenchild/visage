@@ -9,7 +9,7 @@ require 'digest/md5'
 module Visage
   class Profile
     attr_reader :options, :selected_hosts, :hosts, :selected_metrics, :metrics,
-                :name, :errors
+                :name, :errors, :backend
 
     def self.load
       Visage::Config::File.load('profiles.yaml', :create => true, :ignore_bundled => true) || {}
@@ -32,24 +32,31 @@ module Visage
       @options = opts
       @options[:url] = @options[:profile_name] ? @options[:profile_name].downcase.gsub(/[^\w]+/, "+") : nil
       @errors = {}
+      @selected_hosts   = []
+      @selected_metrics = []
 
-      # FIXME: this is nasty
-      # FIXME: doesn't work if there's only one host
-      # FIXME: add regex matching option
-      if @options[:hosts].blank?
-        @selected_hosts = []
-        @hosts = Visage::Collectd::RRDs.hosts
-      else
-        @selected_hosts = Visage::Collectd::RRDs.hosts(:hosts => @options[:hosts])
-        @hosts = Visage::Collectd::RRDs.hosts - @selected_hosts
-      end
+      if(@options[:backend])
+        @backend = @options[:backend].to_sym
+        puts "=======> FOUND BACKEND '#{@backend}'"
+        backend = Visage::Backends::BACKENDS[@backend]
+        @hosts = backend.send(:hosts)
+        @metrics  = []
 
-      if @options[:metrics].blank?
-        @selected_metrics = []
-        @metrics = Visage::Collectd::RRDs.metrics
+        unless @options[:hosts].blank?
+          puts "=============> Founds HOSTS #{@options[:hosts]}"
+          @selected_hosts = backend.send(:hosts,{:hosts => @options[:hosts]})
+          @hosts -= @selected_hosts
+
+          @metrics = backend.send(:metrics, @options)
+          unless @options[:metrics].blank?
+            @selected_metrics = backend.send(:metrics, @options)
+            @metrics -= @selected_metrics
+          end
+        end
       else
-        @selected_metrics = Visage::Collectd::RRDs.metrics(:metrics => @options[:metrics])
-        @metrics = Visage::Collectd::RRDs.metrics - @selected_metrics
+        @hosts    = []
+        @metrics  = []
+        @backend  = nil
       end
     end
 
@@ -61,10 +68,13 @@ module Visage
     def save
       if valid?
         # Construct record.
-        attrs = { :hosts => @options[:hosts],
-                  :metrics => @options[:metrics],
-                  :profile_name => @options[:profile_name],
-                  :url => @options[:profile_name].downcase.gsub(/[^\w]+/, "+") }
+        attrs = {
+          :backend      => @options[:backend],
+          :hosts        => @options[:hosts],
+          :metrics      => @options[:metrics],
+          :profile_name => @options[:profile_name],
+          :url          => @options[:profile_name].downcase.gsub(/[^\w]+/, "+")
+        }
 
         # Save it.
         profiles = self.class.load
