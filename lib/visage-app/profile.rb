@@ -96,12 +96,13 @@ module Visage
 
     def graphs
       graphs = []
-
-      hosts = Visage::Collectd::RRDs.hosts(:hosts => @options[:hosts])
+      
+      backend = Visage::Backends::BACKENDS[@backend]
+      hosts = backend.send(:hosts,{:hosts => @options[:hosts]})
       metrics = @options[:metrics]
       hosts.each do |host|
         attrs = {}
-        globs = Visage::Collectd::RRDs.metrics(:host => host, :metrics => metrics)
+        globs = backend.send(:metrics, {:host => host, :metrics => metrics})
         globs.each do |n|
           parts    = n.split('/')
           plugin   = parts[0]

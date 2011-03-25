@@ -1,8 +1,3 @@
-#!/usr/bin/env ruby
-
-$: << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..'))
-
-require 'lib/visage-app/patches'
 require 'zenoss'
 
 module Visage
@@ -39,10 +34,13 @@ module Visage
           pass   = Visage::Config.zenoss_pass
           zenoss = ::Zenoss.connect server, user, pass
 
-          if opts[:hosts].blank?
-            []
-          else
-            host = zenoss.find_devices_by_name(opts[:hosts]).first
+          if opts[:host] || opts[:hosts]
+            if opts[:host]
+              key = :host
+            else
+              key = :hosts
+            end
+            host = zenoss.find_devices_by_name(opts[key]).first
             datapoints  = host.get_rrd_data_points.map {|dp| dp.name}
             case
             when opts[:metrics].blank?
@@ -53,6 +51,8 @@ module Visage
             else
               [opts[:metrics]] & datapoints
             end
+          else
+            []
           end
         end
 
