@@ -46,7 +46,7 @@ module Visage
           Dir.glob("#{rrddir}/#{host_glob}/#{glob}.rrd").map {|e| e.split('/')[-2..-1].join('/').gsub(/\.rrd$/, '')}.sort.uniq
         end
 
-        def json_encoder(opts)
+        def json_encoder(opts = {})
           CollectdJSON.new(opts)
         end
 

@@ -50,7 +50,7 @@ module Visage
         end
       end
 
-      def self.json_encoder(opts)
+      def self.json_encoder(opts={})
         Visage::Backends::ZenossJSON.new(opts)
       end
 

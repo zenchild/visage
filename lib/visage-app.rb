@@ -91,10 +91,9 @@ module Visage
       plugin = params[:captures][2].gsub("\0", "")
       plugin_instances = params[:captures][3].gsub("\0", "")
 
-      json_enc = Visage::Backends::BACKENDS[backend.to_sym].json_encoder
+      json_enc = Visage::Backends::BACKENDS[backend.to_sym].send(:json_encoder)
 
-      collectd = CollectdJSON.new(:rrddir => Visage::Config.collectd_rrddir)
-      json = collectd.json(:host => host,
+      json = json_enc.json(:host => host,
                            :plugin => plugin,
                            :plugin_instances => plugin_instances,
                            :start => params[:start],
@@ -103,9 +102,11 @@ module Visage
       maybe_wrap_with_callback(json)
     end
 
-    get %r{/data/([^/]+)} do
-      host = params[:captures][0].gsub("\0", "")
-      metrics = Visage::Collectd::RRDs.metrics(:host => host)
+    get %r{/data/([^/]+)/([^/]+)} do
+      backend = params[:captures][0].gsub("\0", "")
+      host = params[:captures][1].gsub("\0", "")
+      be = Visage::Backends::BACKENDS[backend.to_sym]
+      metrics = be.send(:metrics, {:host => host})
 
       json = { host => metrics }.to_json
       maybe_wrap_with_callback(json)
@@ -114,7 +115,6 @@ module Visage
     get %r{/data(/)*} do
       hosts = []
       Visage::Backends::BACKENDS.each_pair do |be_id,be_class|
-        puts "=========> Loading Hosts from #{be_id}"
         hosts += be_class.send(:hosts)
       end
       json = { :hosts => hosts }.to_json
